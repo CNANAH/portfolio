@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人作品集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            line-height: 1.2;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            padding: 0 20px 10px 20px;
+            margin-bottom: 10px;
+        }
+
+        .portfolio-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .portfolio-header p {
+            font-size: 1.2rem;
+            color: #a0a0b0;
+        }
+
+        .work-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px; /* 减少内边距，让边框紧贴内容 */
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .work-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .work-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .work-title span {
+            font-size: 1.5rem;
+        }
+
+        .work-subtitle {
+            font-size: 1rem;
+            color: #8888aa;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+            color: #e0e0ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .work-description {
+            color: #c0c0d0;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .data-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .data-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-label {
+            font-size: 0.9rem;
+            color: #a0a0b0;
+            margin-top: 8px;
+        }
+
+        .highlights {
+            margin: 24px 0;
+        }
+
+        .highlight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .highlight-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .highlight-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e0e0ff;
+            margin-bottom: 6px;
+        }
+
+        .highlight-content p {
+            font-size: 0.95rem;
+            color: #a0a0b0;
+            line-height: 1.2;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 10px 0 0 0; /* 移除底部外边距，避免多余空白 */
+        }
+
+        .work-image {
+            width: 100%;
+            display: flex;
+            justify-content: center; /* 图片水平居中，左右留空白 */
+        }
+
+        /* 作品1图片样式：缩放0.7倍 + 底部紧贴无空白 */
+        .work1-image-grid .work-image {
+            aspect-ratio: 9/16;
+        }
+
+        .work1-image-grid .work-image img {
+            height: 400px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            transform: scale(0.7); /* 核心修改：缩放0.7倍 */
+            transform-origin: center bottom; /* 底部对齐，无空白 */
+        }
+
+        /* 除作品1外的所有作品图片样式 */
+        .image-grid:not(.work1-image-grid) .work-image img {
+            width: 50%; /* 缩放到50% */
+            height: auto;
+            display: block;
+            transform: none !important; /* 移除悬停缩放效果 */
+            margin: 0 auto; /* 水平居中，底部无空白 */
+        }
+
+        .project-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0a0b0;
+            font-size: 0.95rem;
+        }
+
+        .info-item strong {
+            color: #e0e0ff;
+        }
+
+        .footer-note {
+            text-align: center;
+            padding: 40px 20px;
+            color: #606080;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-header h1 {
+                font-size: 2rem;
+            }
+            
+            .work-section {
+                padding: 16px; /* 移动端进一步减少内边距 */
+            }
+            
+            .work-title {
+                font-size: 1.4rem;
+            }
+            
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .work1-image-grid .work-image img {
+                height: auto;
+            }
+
+            /* 移动端图片也保持50%缩放 */
+            .image-grid:not(.work1-image-grid) .work-image img {
+                width: 70%; /* 移动端适度放大一点，仍保持小于100% */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="portfolio-header">
+            <h1>个人作品集</h1>
+            <p>视频剪辑 · 影视制作 · 创意设计</p>
+        </header>
+
+        <!-- 作品一：信息流 -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>🎬</span>
+                作品一：信息流（短视频）
+            </h2>
+            <p class="work-subtitle">电商 + 咖啡 + 电工</p>
+            
+            <h3 class="section-title">📖 项目背景与目标</h3>
+            <p class="work-description">
+                针对电商运营、咖啡品牌营销、装配电工这3个赛道的信息差，打造爆款宣传单品，实现品牌破圈。
+            </p>
+
+            <h3 class="section-title">🚀 实战成果：超出预期的增长答卷</h3>
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-number">2k+</div>
+                    <div class="data-label">矩阵账号单月涨粉量</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-number">40w+</div>
+                    <div class="data-label">播放量</div>
+                </div>
+            </div>
+
+            <div class="image-grid work1-image-grid">
+                <a href="https://pan.baidu.com/s/1b9KBs91jUd6J_HuJUbQ6Ug?pwd=eh3w" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/w5L01wPbbF" alt="装配电工宣传">
+                </a>
+                <a href="https://pan.baidu.com/s/1b9KBs91jUd6J_HuJUbQ6Ug?pwd=eh3w" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/TpW51wPbbF" alt="咖啡制作">
+                </a>
+                <a href="https://pan.baidu.com/s/1b9KBs91jUd6J_HuJUbQ6Ug?pwd=eh3w" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/VNlx1wPbbF" alt="电商就是赛博种地">
+                </a>
+            </div>
+        </section>
+
+        <!-- 作品二：电商培训宣传 -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>🎯</span>
+                作品二：电商培训宣传（短视频）
+            </h2>
+            
+            <h3 class="section-title">🎯 核心策略</h3>
+            <p class="work-description">
+                价值可视化，以真实叙事激发学员报名热情
+            </p>
+
+            <h3 class="section-title">📌 项目档案</h3>
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>电商培训宣传片
+                </div>
+                <div class="info-item">
+                    <strong>制作工具：</strong>剪映 + DaVinci Resolve
+                </div>
+            </div>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">💡</div>
+                    <div class="highlight-content">
+                        <h4>亮点 I：价值可视化的镜头语言</h4>
+                        <p>拒绝空洞的口号，通过快节奏的分镜剪辑与动态数据的视觉化展示，将抽象的"培训价值"转化为直观的"学员成功案例"与"技能提升"的具象画面，让观众一眼感知课程的核心收益。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎞️</div>
+                    <div class="highlight-content">
+                        <h4>亮点 II：建立信任的情感叙事</h4>
+                        <p>摒弃枯燥的说教模式，以真实学员的成长故事为叙事主线。通过细腻的镜头捕捉从迷茫到蜕变的心路历程，极大增强观众的代入感与信任感，有效降低潜在学员的报名决策门槛。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">📸</div>
+                    <div class="highlight-content">
+                        <h4>视频画面实录</h4>
+                        <p>展示真实的讲师形象与线下实操场景，还原最真实的教学氛围，让宣传更具说服力。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://pan.baidu.com/s/1LThY0G8zfGwNciUHQmRltA?pwd=n4wa" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/v8WK1wPbbK" alt="大湾青年电商培训">
+                </a>
+            </div>
+        </section>
+
+        <!-- 作品三：企业活动记录 -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>📹</span>
+                作品三：企业活动记录（10分钟中长视频）
+            </h2>
+            
+            <h3 class="section-title">🎯 核心概念</h3>
+            <p class="work-description">
+                多机位叙事 · 捕捉瞬间 · 还原热烈氛围
+                <br>
+                告别单调的活动流水账，以专业影视级视角，为企业留存高光时刻，让影像成为企业文化的鲜活注脚。
+            </p>
+
+            <h3 class="section-title">📂 项目制作档案</h3>
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>企业活动记录 / 品牌宣传片
+                </div>
+                <div class="info-item">
+                    <strong>制作工具：</strong>达芬奇、剪映
+                </div>
+            </div>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎥</div>
+                    <div class="highlight-content">
+                        <h4>多机位叙事</h4>
+                        <p>采用3台摄像机多视角同步拍摄，无缝剪辑打破单一视角局限，构建丰富视觉层次。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎤</div>
+                    <div class="highlight-content">
+                        <h4>氛围感营造</h4>
+                        <p>特写镜头捕捉微表情与互动，搭配激昂BGM，精准还原并放大现场热烈氛围。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://pan.baidu.com/s/1cmXvHeMRlP-con_gcbp6dw?pwd=fc7p" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/hPtK1wPbbS" alt="2025.12.6迎新会">
+                </a>
+            </div>
+
+            <p class="work-description" style="text-align: center; margin-top: 20px; font-style: italic;">
+                DESIGNED FOR PROFESSIONAL VISUAL NARRATIVE | 用镜头语言讲述企业故事，让活动影像成为品牌的长期记忆资产。
+            </p>
+        </section>
+
+        <!-- 作品四：头部博主个人混剪 -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>✨</span>
+                作品四：哔哩哔哩头部知识区博主混剪（8分钟中长视频）
+            </h2>
+            
+            <h3 class="section-title">📝 CORE DESCRIPTION / 核心描述</h3>
+            <p class="work-description">
+                这是一场献给知识传播者的"数字交响乐"。我采集了一位B站头部科普博主汤质的思想火花，以达芬奇剪辑为魔法，熔炼成一曲赞歌。
+            </p>
+
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>创意混剪
+                </div>
+                <div class="info-item">
+                    <strong>制作软件：</strong>DaVinci Resolve
+                </div>
+                <div class="info-item">
+                    <strong>播放数据：</strong>~1.7万
+                </div>
+                <div class="info-item">
+                    <strong>互动数据：</strong>500+
+                </div>
+            </div>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎵</div>
+                    <div class="highlight-content">
+                        <h4>情感曲线设计</h4>
+                        <p>通过精准的音乐卡点与镜头组接，构建从平静铺陈到高潮爆发的完整情感曲线。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🔗</div>
+                    <div class="highlight-content">
+                        <h4>共鸣与传播</h4>
+                        <p>精准把握科普观众心理，以高质量的剪辑节奏与情感内核引发广泛共鸣。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://pan.baidu.com/s/1RH7oibul_nDNz0kjhowBaw?pwd=qvb7" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/Qbgo1wPbbV" alt="线下活动合影">
+                </a>
+            </div>
+        </section>
+
+        <!-- 作品五：视听语言分析-艾尔登法环CG -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>🎮</span>
+                作品五：视听语言分析-艾尔登法环CG（3分钟短视频）
+            </h2>
+            
+            <h3 class="section-title">📝 CORE DESCRIPTION / 核心描述</h3>
+            <p class="work-description">
+                深入《艾尔登法环》的CG世界，将宏大的叙事拆解为神与神的呼吸，分析光影如何雕刻史诗感，揭示顶级视听语言背后的逻辑与美学。
+            </p>
+
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>影视知识科普
+                </div>
+                <div class="info-item">
+                    <strong>制作工具：</strong>DaVinci Resolve
+                </div>
+            </div>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">🔍</div>
+                    <div class="highlight-content">
+                        <h4>解构叙事</h4>
+                        <p>画面与动态标注并用，清晰拆解镜头语言，降低理解门槛。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎵</div>
+                    <div class="highlight-content">
+                        <h4>节奏卡点</h4>
+                        <p>解说词与画面严丝合缝，配合转场引导观众沉浸式思考。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://www.bilibili.com/video/BV1zSRYB8Ezw/?share_source=copy_web&vd_source=8f8ab947da786f944329c9842880517f" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/ez8j1wPbbV" alt="艾尔登法环CG">
+                </a>
+            </div>
+        </section>
+
+        <!-- 作品六：短科普（组块化） -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>🧠</span>
+                作品六：短科普（组块化）（3分钟短视频）
+            </h2>
+            
+            <h3 class="section-title">📝 核心概念</h3>
+            <p class="work-description">
+                数字时代的知识炼金术。以前所未有的"剪刀"，将复杂的知识"组块化"认知理论，与游戏《拳皇》熔炼为易于消化的轻盈信息流。
+            </p>
+
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>知识科普短视频
+                </div>
+                <div class="info-item">
+                    <strong>制作软件：</strong>剪映 / Adobe After Effects
+                </div>
+            </div>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">⚡</div>
+                    <div class="highlight-content">
+                        <h4>快节奏叙事</h4>
+                        <p>适配短视频平台的快节奏语言，保障高信息密度，牢牢抓住观众注意力。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎮</div>
+                    <div class="highlight-content">
+                        <h4>跨媒介素材</h4>
+                        <p>巧妙结合经典游戏、电影片段与动态文字，丰富视觉体验，打破枯燥感。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://www.bilibili.com/video/BV1BTSaBrEga/?share_source=copy_web&vd_source=8f8ab947da786f944329c9842880517f" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/oBXP1wPbbi" alt="拳皇游戏画面">
+                </a>
+            </div>
+        </section>
+
+        <!-- 作品七：游戏混剪-艾尔登法环 -->
+        <section class="work-section">
+            <h2 class="work-title">
+                <span>⚔️</span>
+                作品七：游戏混剪 - 艾尔登法环（1分钟短视频）
+            </h2>
+            
+            <p class="work-subtitle">PROJECT 07 / ELDEN RING</p>
+
+            <div class="project-info">
+                <div class="info-item">
+                    <strong>作品类型：</strong>游戏混剪
+                </div>
+                <div class="info-item">
+                    <strong>使用软件：</strong>DaVinci Resolve
+                </div>
+            </div>
+
+            <p class="work-description">
+                我是交界地的吟游诗人，用镜头记录褪色者的传奇。通过达芬奇的调色盘，将《艾尔登法环》的战斗、探索与史诗感，编织成一幅流动的画卷。
+            </p>
+
+            <div class="highlights">
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎨</div>
+                    <div class="highlight-content">
+                        <h4>色彩美学</h4>
+                        <p>"色环挑战"，以游戏区域色为核心视觉线索。</p>
+                    </div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🎵</div>
+                    <div class="highlight-content">
+                        <h4>动态沉浸</h4>
+                        <p>战斗画面与音乐鼓点完美契合，营造极致视听冲击力。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-grid">
+                <a href="https://www.bilibili.com/video/BV1WeouBgEsH/?share_source=copy_web&vd_source=8f8ab947da786f944329c9842880517f" target="_blank" class="work-image">
+                    <img src="https://aka.doubaocdn.com/s/sc5k1wPbbi" alt="艾尔登法环战斗画面">
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer-note">
+            <p>DESIGNED FOR PROFESSIONAL VISUAL NARRATIVE</p>
+            <p style="margin-top: 8px;">用镜头语言讲述故事，让影像成为永恒的记忆资产</p>
+        </footer>
+    </div>
+</body>
+</html>
