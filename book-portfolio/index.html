@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>图书信息流 · 个人作品集</title>
+    <style>
+        /* ========== CSS 变量 ========== */
+        :root {
+            --bg-primary: #0A0F1E;
+            --bg-secondary: #0F172A;
+            --bg-card: #1E293B;
+            --bg-card-hover: #253449;
+            --accent-cyan: #00E5FF;
+            --accent-blue: #3B82F6;
+            --accent-green: #34D399;
+            --accent-pink: #F472B6;
+            --accent-lightblue: #38BDF8;
+            --accent-yellow: #FACC15;
+            --accent-purple: #A78BFA;
+            --text-primary: #FFFFFF;
+            --text-subtitle: #BAE6FD;
+            --text-body: #CBD5E1;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+            --border-subtle: rgba(0, 229, 255, 0.12);
+            --border-card: rgba(51, 65, 85, 0.5);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --font-family: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', -apple-system, 'Segoe UI', sans-serif;
+            --max-width: 1200px;
+        }
+
+        /* ========== 全局重置 ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 60px;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ========== 背景纹理 ========== */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 70%, rgba(244, 114, 182, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========== 容器 ========== */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== Hero 区域 ========== */
+        .hero {
+            padding: 16px 0 0 0;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: clamp(1.6rem, 4vw, 2.8rem);
+            font-weight: 900;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+            animation: fadeInUp 0.8s ease-out;
+            margin: 0;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            color: var(--text-subtitle);
+            letter-spacing: 0.06em;
+            font-weight: 300;
+            margin-top: 4px;
+            animation: fadeInUp 0.8s ease-out 0.15s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 分类导航 ========== */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 12px 0;
+            transition: background 0.3s;
+        }
+
+        .nav-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            border: 1px solid var(--border-card);
+            background: rgba(30, 41, 59, 0.6);
+            color: var(--text-muted);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-tab:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+            color: var(--text-body);
+        }
+
+        .nav-tab.active {
+            color: var(--bg-primary);
+            font-weight: 700;
+        }
+
+        .nav-tab[data-category="ancient"].active {
+            background: var(--accent-pink);
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.3);
+        }
+
+        .nav-tab[data-category="modern"].active {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+        }
+
+        .nav-tab[data-category="foreign"].active {
+            background: var(--accent-lightblue);
+            border-color: var(--accent-lightblue);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .nav-dot.ancient { background: var(--accent-pink); }
+        .nav-dot.modern { background: var(--accent-green); }
+        .nav-dot.foreign { background: var(--accent-lightblue); }
+
+        .nav-tab.active .nav-dot {
+            background: var(--bg-primary);
+        }
+
+        /* ========== 分类区块 ========== */
+        .category-section {
+            padding: 80px 0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .category-accent-bar {
+            width: 4px;
+            height: 28px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .category-accent-bar.ancient { background: var(--accent-pink); }
+        .category-accent-bar.modern { background: var(--accent-green); }
+        .category-accent-bar.foreign { background: var(--accent-lightblue); }
+
+        .category-label {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .category-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        /* ========== 图书卡片网格 ========== */
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        /* ========== 图书卡片 ========== */
+        .book-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .book-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .book-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 229, 255, 0.08);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1724 100%);
+        }
+
+        /* 封面加载骨架屏 */
+        .book-cover-wrap {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1724 100%);
+            aspect-ratio: 2 / 3;
+        }
+
+        .book-cover-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .book-cover-wrap img {
+            position: relative;
+            z-index: 2;
+            transition: opacity 0.4s;
+        }
+
+        .book-cover-wrap.loaded::before {
+            display: none;
+        }
+
+        .cover-fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            z-index: 2;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .book-info {
+            padding: 16px 20px 20px;
+        }
+
+        .book-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .book-desc {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 分类色指示条 */
+        .book-card[data-category="ancient"] { border-top: 3px solid var(--accent-pink); }
+        .book-card[data-category="modern"] { border-top: 3px solid var(--accent-green); }
+        .book-card[data-category="foreign"] { border-top: 3px solid var(--accent-lightblue); }
+
+        /* ========== 封面链接 ========== */
+        .cover-link {
+            display: block;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-link::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 229, 255, 0);
+            transition: background 0.3s ease;
+            z-index: 3;
+        }
+
+        .cover-link:hover::after {
+            background: rgba(0, 229, 255, 0.08);
+        }
+
+        .cover-link:hover .book-cover {
+            transform: scale(1.05);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1724 100%);
+            transition: transform 0.4s ease;
+        }
+
+        /* ========== 页脚 ========== */
+        .site-footer {
+            text-align: center;
+            padding: 48px 24px 40px;
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 40px;
+        }
+
+        .site-footer span {
+            color: var(--accent-cyan);
+        }
+
+        /* ========== 响应式：平板 (640px - 1023px) ========== */
+        @media (max-width: 1023px) {
+            .book-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .category-section {
+                padding: 60px 0;
+            }
+        }
+
+        /* ========== 响应式：手机 (< 640px) ========== */
+        @media (max-width: 639px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .hero-subtitle {
+                letter-spacing: 0.04em;
+            }
+
+            .nav-inner {
+                gap: 8px;
+            }
+
+            .nav-tab {
+                padding: 8px 16px;
+                font-size: 0.82rem;
+            }
+
+            .book-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            /* 手机端：卡片横向布局 */
+            .book-card {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .book-cover-wrap {
+                width: 100px;
+                flex-shrink: 0;
+            }
+
+            .book-cover-wrap .book-cover {
+                height: 100%;
+            }
+
+            .book-info {
+                padding: 12px 14px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .book-title {
+                font-size: 1rem;
+            }
+
+            .category-section {
+                padding: 48px 0;
+            }
+
+            .category-header {
+                margin-bottom: 24px;
+            }
+
+            .category-label {
+                font-size: 1.25rem;
+            }
+
+            .site-footer {
+                padding: 36px 16px 48px;
+                padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px));
+            }
+
+        }
+
+        /* ========== 极小屏 ========== */
+        @media (max-width: 374px) {
+            .nav-tab {
+                padding: 7px 12px;
+                font-size: 0.75rem;
+                gap: 5px;
+            }
+
+            .book-cover-wrap {
+                width: 80px;
+            }
+
+            .book-title {
+                font-size: 0.92rem;
+            }
+
+            .book-desc {
+                font-size: 0.75rem;
+                -webkit-line-clamp: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== Hero 区域 ==================== -->
+    <section class="hero" id="top">
+        <div class="container">
+            <h1 class="hero-title">图书信息流</h1>
+            <p class="hero-subtitle">中国古代 / 中国近现代 / 外国经典</p>
+        </div>
+    </section>
+
+    <!-- ==================== 分类导航 ==================== -->
+    <nav class="nav-bar" id="navBar">
+        <div class="nav-inner">
+            <button class="nav-tab active" data-category="ancient" onclick="scrollToCategory('ancient')">
+                <span class="nav-dot ancient"></span>中国古代
+            </button>
+            <button class="nav-tab" data-category="modern" onclick="scrollToCategory('modern')">
+                <span class="nav-dot modern"></span>中国近现代
+            </button>
+            <button class="nav-tab" data-category="foreign" onclick="scrollToCategory('foreign')">
+                <span class="nav-dot foreign"></span>外国
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==================== 一、中国古代 ==================== -->
+    <section class="category-section" id="section-ancient">
+        <div class="container">
+            <div class="category-header">
+                <div class="category-accent-bar ancient"></div>
+                <h2 class="category-label">一、中国古代<span class="category-count">共 6 本</span></h2>
+            </div>
+
+            <div class="book-grid">
+                <!-- 本草纲目 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/本草纲目.png" alt="本草纲目" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">本</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">本草纲目</h3>
+                        <p class="book-author">李时珍 · 明代</p>
+                        <p class="book-desc">东方药学巨典，集16世纪以前中国药物学之大成，被誉为"中国古代百科全书"。</p>
+                    </div>
+                </div>
+
+                <!-- 曾国藩 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/曾国藩.png" alt="曾国藩" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">曾</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">曾国藩</h3>
+                        <p class="book-author">唐浩明 · 清代</p>
+                        <p class="book-desc">晚清名臣曾国藩的传奇人生，一部中国式处世智慧的教科书级历史小说。</p>
+                    </div>
+                </div>
+
+                <!-- 封神演义 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/封神演义.png" alt="封神演义" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">封</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">封神演义</h3>
+                        <p class="book-author">许仲琳 · 明代</p>
+                        <p class="book-desc">中国神魔小说经典之作，以武王伐纣为背景，构筑宏大的神话体系与瑰丽想象。</p>
+                    </div>
+                </div>
+
+                <!-- 王维集 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/王维集.png" alt="王维集" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">王</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">王维集</h3>
+                        <p class="book-author">王维 · 唐代</p>
+                        <p class="book-desc">盛唐山水田园诗派代表，"诗中有画，画中有诗"的千古佳作合集。</p>
+                    </div>
+                </div>
+
+                <!-- 朱元璋传 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/朱元璋.png" alt="朱元璋传" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">朱</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">朱元璋传</h3>
+                        <p class="book-author">吴晗 · 明代</p>
+                        <p class="book-desc">明史大家吴晗力作，从乞丐到皇帝的传奇历程，还原真实的洪武大帝。</p>
+                    </div>
+                </div>
+
+                <!-- 庄子 -->
+                <div class="book-card" data-category="ancient">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/庄子.png" alt="庄子" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#2d1a2d,#1a1025);color:rgba(244,114,182,0.3);">庄</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">庄子</h3>
+                        <p class="book-author">庄周 · 战国</p>
+                        <p class="book-desc">道家哲学巅峰之作，以汪洋恣肆的寓言想象探索逍遥无待的精神自由。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 二、中国近现代 ==================== -->
+    <section class="category-section" id="section-modern">
+        <div class="container">
+            <div class="category-header">
+                <div class="category-accent-bar modern"></div>
+                <h2 class="category-label">二、中国近现代<span class="category-count">共 3 本</span></h2>
+            </div>
+
+            <div class="book-grid">
+                <!-- 繁花 -->
+                <div class="book-card" data-category="modern">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/繁花.png" alt="繁花" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2d1f,#102518);color:rgba(52,211,153,0.3);">繁</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">繁花</h3>
+                        <p class="book-author">金宇澄 · 当代</p>
+                        <p class="book-desc">第九届茅盾文学奖获奖作品，沪语叙事织就上海半个世纪的市井烟火图卷。</p>
+                    </div>
+                </div>
+
+                <!-- 文化苦旅 -->
+                <div class="book-card" data-category="modern">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/文化苦旅.png" alt="文化苦旅" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2d1f,#102518);color:rgba(52,211,153,0.3);">文</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">文化苦旅</h3>
+                        <p class="book-author">余秋雨 · 当代</p>
+                        <p class="book-desc">开创文化大散文之先河，在山水间探寻中华文明的精神脉络与历史沉思。</p>
+                    </div>
+                </div>
+
+                <!-- 我的前半生 -->
+                <div class="book-card" data-category="modern">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/我的前半生.png" alt="我的前半生" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2d1f,#102518);color:rgba(52,211,153,0.3);">我</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">我的前半生</h3>
+                        <p class="book-author">爱新觉罗·溥仪 · 现代</p>
+                        <p class="book-desc">末代皇帝亲笔自传，从紫禁城到普通公民，一部跨越时代的个人与家国史诗。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 三、外国 ==================== -->
+    <section class="category-section" id="section-foreign">
+        <div class="container">
+            <div class="category-header">
+                <div class="category-accent-bar foreign"></div>
+                <h2 class="category-label">三、外国<span class="category-count">共 3 本</span></h2>
+            </div>
+
+            <div class="book-grid">
+                <!-- 静静的顿河 -->
+                <div class="book-card" data-category="foreign">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/静静的顿河.png" alt="静静的顿河" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2530,#101a24);color:rgba(56,189,248,0.3);">静</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">静静的顿河</h3>
+                        <p class="book-author">肖洛霍夫 · 苏联</p>
+                        <p class="book-desc">诺贝尔文学奖获奖巨著，哥萨克人的命运在战争与革命的洪流中沉浮。</p>
+                    </div>
+                </div>
+
+                <!-- 思考致富 -->
+                <div class="book-card" data-category="foreign">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/思考致富.png" alt="思考致富" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2530,#101a24);color:rgba(56,189,248,0.3);">思</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">思考致富</h3>
+                        <p class="book-author">拿破仑·希尔 · 美国</p>
+                        <p class="book-desc">风靡全球的成功学经典，提炼500位顶尖成功者的思维法则与致富哲学。</p>
+                    </div>
+                </div>
+
+                <!-- 悉达多 -->
+                <div class="book-card" data-category="foreign">
+                    <a class="cover-link" href="#" data-pan-link><div class="book-cover-wrap">
+                        <img class="book-cover" src="covers/悉达多.png" alt="悉达多" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="cover-fallback" style="display:none;background:linear-gradient(135deg,#1a2530,#101a24);color:rgba(56,189,248,0.3);">悉</div>
+                    </div></a>
+                    <div class="book-info">
+                        <h3 class="book-title">悉达多</h3>
+                        <p class="book-author">赫尔曼·黑塞 · 德国/瑞士</p>
+                        <p class="book-desc">诺贝尔文学奖得主黑塞代表作，一首关于自我探索与精神觉醒的印度诗篇。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 页脚 ==================== -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>DESIGNED FOR <span>BOOK INFORMATION FLOW</span> · 用镜头语言讲述书籍故事</p>
+        </div>
+    </footer>
+
+    <!-- ==================== JavaScript ==================== -->
+    <script>
+    (function () {
+        'use strict';
+
+        // ========== 滚动入场动画 (Intersection Observer) ==========
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        // stagger 延迟
+                        const cards = entry.target.parentElement
+                            ? Array.from(entry.target.parentElement.querySelectorAll('.book-card:not(.visible)'))
+                            : [];
+                        const idx = cards.indexOf(entry.target);
+                        const delay = idx >= 0 ? idx * 80 : 0;
+
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, delay);
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+        );
+
+        document.querySelectorAll('.book-card').forEach((card) => {
+            observer.observe(card);
+        });
+
+        // ========== 导航标签自动高亮 (Scroll Spy) ==========
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const sections = {
+            ancient: document.getElementById('section-ancient'),
+            modern: document.getElementById('section-modern'),
+            foreign: document.getElementById('section-foreign')
+        };
+
+        let scrollTicking = false;
+
+        function updateActiveTab() {
+            const scrollY = window.scrollY;
+            const navHeight = document.getElementById('navBar').offsetHeight;
+            const threshold = scrollY + navHeight + 80;
+
+            let activeCategory = 'ancient';
+
+            if (sections.ancient && sections.ancient.offsetTop < threshold) {
+                activeCategory = 'ancient';
+            }
+            if (sections.modern && sections.modern.offsetTop < threshold) {
+                activeCategory = 'modern';
+            }
+            if (sections.foreign && sections.foreign.offsetTop < threshold) {
+                activeCategory = 'foreign';
+            }
+
+            navTabs.forEach((tab) => {
+                const cat = tab.getAttribute('data-category');
+                if (cat === activeCategory) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            scrollTicking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!scrollTicking) {
+                requestAnimationFrame(updateActiveTab);
+                scrollTicking = true;
+            }
+        }, { passive: true });
+
+        // ========== 点击导航标签 → 平滑滚动 ==========
+        window.scrollToCategory = function (category) {
+            const section = sections[category];
+            if (section) {
+                const navHeight = document.getElementById('navBar').offsetHeight;
+                const top = section.offsetTop - navHeight - 16;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        };
+
+        // ========== 图片加载完成后移除骨架屏 ==========
+        document.querySelectorAll('.book-cover').forEach((img) => {
+            if (img.complete) {
+                img.closest('.book-cover-wrap').classList.add('loaded');
+            } else {
+                img.addEventListener('load', function () {
+                    this.closest('.book-cover-wrap').classList.add('loaded');
+                });
+            }
+        });
+
+        // ========== 按分类设置封面链接 ==========
+        const panUrls = {
+            ancient: 'https://pan.baidu.com/s/11FmTNxiM3S0pvGJtvCa-OQ?pwd=wdbr',
+            modern: 'https://pan.baidu.com/s/1-EmoQn11Fh91KolQKEu2dg?pwd=xeni',
+            foreign: 'https://pan.baidu.com/s/17J2i5A3yshAeRapCNNJh5w?pwd=sfta'
+        };
+
+        document.querySelectorAll('.cover-link').forEach((link) => {
+            const card = link.closest('.book-card');
+            if (card) {
+                const category = card.getAttribute('data-category');
+                if (category && panUrls[category]) {
+                    link.href = panUrls[category];
+                }
+            }
+        });
+
+        // ========== 初始高亮 ==========
+        updateActiveTab();
+    })();
+    </script>
+
+</body>
+</html>
